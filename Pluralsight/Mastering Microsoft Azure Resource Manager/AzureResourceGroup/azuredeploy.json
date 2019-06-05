@@ -1,0 +1,170 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "developmentMachineStorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    },
+    "developmentMachineName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "developmentMachineAdminUserName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "developmentMachineAdminPassword": {
+      "type": "securestring"
+    },
+    "developmentMachineWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ]
+    }},
+  "variables": {
+    "developmentMachineStorageName": "[concat('developmentMachineStorage', uniqueString(resourceGroup().id))]",
+    "developmentMachineNetworkPrefix": "10.0.0.0/16",
+    "developmentMachineNetworkSubnet1Name": "Subnet-1",
+    "developmentMachineNetworkSubnet1Prefix": "10.0.0.0/24",
+    "developmentMachineNetworkSubnet2Name": "Subnet-2",
+    "developmentMachineNetworkSubnet2Prefix": "10.0.1.0/24",
+    "developmentMachineImagePublisher": "MicrosoftWindowsServer",
+    "developmentMachineImageOffer": "WindowsServer",
+    "developmentMachineOSDiskName": "developmentMachineOSDisk",
+    "developmentMachineVmSize": "Standard_D2_v2",
+    "developmentMachineVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'developmentMachineNetwork')]",
+    "developmentMachineSubnetRef": "[concat(variables('developmentMachineVnetID'), '/subnets/', variables('developmentMachineNetworkSubnet1Name'))]",
+    "developmentMachineStorageAccountContainerName": "vhds",
+    "developmentMachineNicName": "[concat(parameters('developmentMachineName'), 'NetworkInterface')]"},
+  "resources": [
+    {
+      "name": "[variables('developmentMachineStorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "[parameters('developmentMachineStorageType')]"
+      },
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "developmentMachineStorage"
+      },
+      "kind": "Storage"
+    },
+    {
+      "name": "developmentMachineNetwork",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "developmentMachineNetwork"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('developmentMachineNetworkPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('developmentMachineNetworkSubnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('developmentMachineNetworkSubnet1Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('developmentMachineNetworkSubnet2Name')]",
+            "properties": {
+              "addressPrefix": "[variables('developmentMachineNetworkSubnet2Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('developmentMachineNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'developmentMachineNetwork')]"
+      ],
+      "tags": {
+        "displayName": "developmentMachineNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('developmentMachineSubnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('developmentMachineName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('developmentMachineStorageName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('developmentMachineNicName'))]"
+      ],
+      "tags": {
+        "displayName": "developmentMachine"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('developmentMachineVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('developmentMachineName')]",
+          "adminUsername": "[parameters('developmentMachineAdminUsername')]",
+          "adminPassword": "[parameters('developmentMachineAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('developmentMachineImagePublisher')]",
+            "offer": "[variables('developmentMachineImageOffer')]",
+            "sku": "[parameters('developmentMachineWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "developmentMachineOSDisk",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('developmentMachineStorageName')), '2016-01-01').primaryEndpoints.blob, variables('developmentMachineStorageAccountContainerName'), '/', variables('developmentMachineOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('developmentMachineNicName'))]"
+            }
+          ]
+        }
+      }
+    }],
+  "outputs": {}
+}
