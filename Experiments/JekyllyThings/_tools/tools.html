@@ -1,0 +1,40 @@
+---
+title: Tools Main Page
+permalink: "/docs/tools"
+---
+
+<!-- All one line so that the formatting does not get weird -->
+<!-- \ is an invalid url character, so it should be safe to use as a temporary delimiter -->
+{% capture rawSiteMap %}{% for page in site.documents %}{{page.url}}\{% endfor %}{% for page in site.pages %}{{page.url}}\{% endfor %}{% endcapture %}
+
+
+{% assign rawUrls = rawSiteMap  | split: "\"  %}
+
+{% assign siteMap = rawUrls | where_exp: item, "1 != 1" %}
+
+<pre>
+{{ rawUrl }}
+</pre>
+
+<!-- Apparently you can't create lists in Liquid, so I started from an empty one -->
+<h1>New List - Site Map</h1>
+{% for site in siteMap %}
+{{ site }} <br/>
+{% endfor %} 
+
+<h1>All Valid Options</h1>
+{% for rawUrl in rawUrls %}
+{{rawUrl}} <br/>
+{% assign splitUrl = rawUrl | slice: 1, rawUrl.size | split: "/"  %}
+{% assign siteMap = siteMap | push: splitUrl %}
+{% endfor %} 
+
+<h1>Site map after options are added</h1>
+{% assign groupedSites = siteMap | sort %}
+{% for site in groupedSites %}
+{{ site }} <br/>
+{% endfor %} 
+
+<!-- {% for page in site.posts %}
+<li>{{page.url}}</li>
+{% endfor %} -->

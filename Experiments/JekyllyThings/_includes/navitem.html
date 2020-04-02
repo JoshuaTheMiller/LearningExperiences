@@ -1,0 +1,9 @@
+<li>{{ include.name }}
+    {% if include.children %}
+    <ul>
+        {% for child in include.children %}
+        <li>{{ child }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</li>

@@ -1,0 +1,72 @@
+---
+title: Fort Main Page
+permalink: "/docs/tools/fortify"
+categories: fortify
+---
+
+Round 1 of creating nav list
+
+<ul>
+    {% for page in  site.tools %}
+    <li><a href="{{site.url}}{{page.url}}" target="_blank">Go: {{page.title }}- {{page.categories}}</a></li>
+    {% endfor %}
+</ul>
+
+Round 2 - filtering by url inclusion of fortify, only for tools
+
+{% assign fortPages = site.tools | where_exp: "item", "item.url contains 'fortify'" %}
+
+<ul>
+    {% for page in fortPages %}
+    <li><a href="{{site.url}}{{page.url}}" target="_blank">Go: {{page.title }}- {{page.categories}}</a></li>
+    {% endfor %}
+</ul>
+
+Round 3- filtering out current Page
+
+{% assign fortPages2 = site.tools | where_exp: "item", "item.url contains 'fortify' and item.url != page.url" %}
+
+<ul>
+    {% for page in fortPages2 %}
+    <li><a href="{{site.url}}{{page.url}}" target="_blank">Go: {{page.title }}- {{page.categories}}</a></li>
+    {% endfor %}
+</ul>
+
+Round 3.5 - Filtering by categories
+
+{% 
+    assign sortedPages = site.tools 
+    | sort:"date" 
+    | reverse 
+    | where_exp: "item", "item.categories contains 'design-pattern' or item.categories contains 'anti-pattern'" 
+%}
+
+<ul>
+    {% for page in  sortedPages %}
+    <li><a href="{{site.url}}{{page.url}}" target="_blank">Go: {{page.title }}- {{page.categories}}</a></li>
+    {% endfor %}
+</ul>
+
+<h2>Including sibling markdown page</h2>
+
+<p>The following line of Liquid code does not work:</p>
+
+<pre>
+{% raw %}
+ {% include_relative readme-part.md | markdownify %} 
+{% endraw %}
+</pre>
+
+<p>To successfully include a sibling page that is markdown, and render it, do the following:</p>
+
+<pre>
+{% raw %}
+    {% capture my_include %}{% include_relative readme-part.md %}{% endcapture %}
+    {{ my_include | markdownify }}
+{% endraw %}
+</pre>
+
+<p>This is how the second snippet looks when functioning:</p>
+
+{% capture my_include %}{% include_relative readme-part.md %}{% endcapture %}
+{{ my_include | markdownify }}

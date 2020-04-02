@@ -1,0 +1,7 @@
+---
+layout: post
+---
+
+{% include toc.html html=content sanitize=true id="my_toc" h_min=1 h_max=4 %}
+
+{{content | markdownify}}
