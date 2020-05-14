@@ -10,7 +10,7 @@ permalink: "/docs/tools"
 
 {% assign rawUrls = rawSiteMap  | split: "\"  %}
 
-{% assign siteMap = rawUrls | where_exp: item, "1 != 1" %}
+{% assign splitUrls = rawUrls | where_exp: item, "1 != 1" %}
 
 <pre>
 {{ rawUrl }}
@@ -18,7 +18,7 @@ permalink: "/docs/tools"
 
 <!-- Apparently you can't create lists in Liquid, so I started from an empty one -->
 <h1>New List - Site Map</h1>
-{% for site in siteMap %}
+{% for site in splitUrls %}
 {{ site }} <br/>
 {% endfor %} 
 
@@ -26,14 +26,39 @@ permalink: "/docs/tools"
 {% for rawUrl in rawUrls %}
 {{rawUrl}} <br/>
 {% assign splitUrl = rawUrl | slice: 1, rawUrl.size | split: "/"  %}
-{% assign siteMap = siteMap | push: splitUrl %}
+{% assign splitUrls = splitUrls | push: splitUrl %}
 {% endfor %} 
 
+{% assign firstResources = rawUrls | where_exp: item, "1 != 1" %}
+
 <h1>Site map after options are added</h1>
-{% assign groupedSites = siteMap | sort %}
-{% for site in groupedSites %}
-{{ site }} <br/>
+{% assign split = splitUrls | compact %}
+{% for site in splitUrls %}
+
+{% assign resource = site[0] %}
+
+{% if resource == "" %}
+<li>blank</li>
+{% endif %}
+
+{% unless firstResources contains resource %}
+<li>{{ resource }}</li>
+{% assign firstResources = firstResources | push: resource %}
+{% endunless %}
 {% endfor %} 
+
+
+
+{{grouped}}
+
+
+
+<!-- {% assign filteredSplitUrls = splitUrls | where_exp: item, "item[0] == 'docs'" %}
+{% for splitUrl in filteredSplitUrls %}
+    {{ splitUrl[0] }} <br/>
+{% endfor %}  -->
+
+
 
 <!-- {% for page in site.posts %}
 <li>{{page.url}}</li>
