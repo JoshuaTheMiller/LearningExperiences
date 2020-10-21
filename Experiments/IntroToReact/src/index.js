@@ -105,11 +105,13 @@ class Game extends React.Component {
         }
 
         const moves = history.map((step, move) => {
-            const desc = move ? `Go to move # ${move}` : 'Go to game start';
+            const desc = move ? `Go to move # ${move}` : 'Go to game start';            
+
+            const isCurrentSelection = move == this.state.stepNumber;
 
             return (
                 <li key={move}>
-                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                    <button className={isCurrentSelection ? "current-selection" : ""} onClick={() => this.jumpTo(move)}>{desc}</button>
                 </li>
             )
         })
