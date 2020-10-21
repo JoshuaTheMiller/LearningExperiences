@@ -91,7 +91,8 @@ class Game extends React.Component {
         
         this.setState({
             history: history.concat([{
-                squares: squares
+                squares: squares,
+                move:i
             }]),
             stepNumber: history.length,
             xIsNext: !this.state.xIsNext            
@@ -116,8 +117,16 @@ class Game extends React.Component {
             status = `Next player: ${(this.state.xIsNext ? 'X' : 'O')}`;
         }
 
-        const moves = history.slice().map((step, move) => {            
-            const desc = move ? `Go to move # ${move}` : 'Go to game start';            
+        const moves = history.slice().map((step, move) => {        
+            // There is most likely an easier way to do this next block 
+            // of logic, as it was apparently the easiest thing in the 
+            // "next steps" part of the tutorial.
+            // This is the first thing that came to mind though.
+            const stepMove = step.move;    
+            const row = Math.floor(stepMove / 3) + 1;
+            const col = stepMove % 3 + 1;
+            // ^^^^^^^^^^^^^
+            const desc = move ? `Go to move # ${move} (${col}/${row})` : 'Go to game start';            
 
             const isCurrentSelection = move == this.state.stepNumber;
 
