@@ -59,14 +59,15 @@ class Game extends React.Component {
                 squares: Array(9).fill(null)
             }],
             xIsNext: true,
-            stepNumber: 0
+            stepNumber: 0,
+            ascending: true
         }
     }
 
     jumpTo(step) {
         this.setState({
             stepNumber: step,
-            xIsNext: (step % 2) === 0
+            xIsNext: (step % 2) === 0            
         })
     }
 
@@ -115,7 +116,7 @@ class Game extends React.Component {
             status = `Next player: ${(this.state.xIsNext ? 'X' : 'O')}`;
         }
 
-        const moves = history.map((step, move) => {
+        const moves = history.slice().map((step, move) => {            
             const desc = move ? `Go to move # ${move}` : 'Go to game start';            
 
             const isCurrentSelection = move == this.state.stepNumber;
@@ -137,7 +138,8 @@ class Game extends React.Component {
                 </div>
                 <div className="game-info">
                     <div>{status}</div>
-                    <ol>{moves}</ol>
+                    <button onClick={() => this.setState({ascending: !this.state.ascending})}>{this.state.ascending ? "Ascending" : "Descending"} Order </button>
+                    <ol>{this.state.ascending ? moves : moves.reverse() }</ol>
                 </div>
             </div>
         );
