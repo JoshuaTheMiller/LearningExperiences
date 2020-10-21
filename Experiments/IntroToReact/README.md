@@ -2,6 +2,14 @@
 
 https://reactjs.org/tutorial/tutorial.html
 
+Further Reading:
+
+- [React.Component](https://reactjs.org/docs/react-component.html)
+- [Optimizing Performance](https://reactjs.org/docs/optimizing-performance.html)
+- [App Development Community Standup: React Native for Windows update](https://www.youtube.com/watch?v=x6-5e3Lifyw)
+
+---
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
