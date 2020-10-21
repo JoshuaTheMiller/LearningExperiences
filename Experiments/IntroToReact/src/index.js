@@ -3,8 +3,9 @@ import ReactDom from 'react-dom'
 import './index.css'
 
 function Square(props) {
+    const className = "square" + (props.shouldHighlight ? " highlight" : "");
     return (
-        <button className="square" onClick={props.onClick}>
+        <button className={className} onClick={props.onClick}>
             {props.content}
         </button>
     )
@@ -12,9 +13,11 @@ function Square(props) {
 
 class Board extends React.Component {
     renderSquare(i) {
+        const shouldHighlight = this.props.squaresToHighlight?.includes(i) ?? false;
         return <Square
             content={this.props.squares[i]}
             onClick={() => this.props.onClick(i)}
+            shouldHighlight={shouldHighlight}
         />;
     }
 
@@ -95,10 +98,10 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
+        const winCalcResult = calculateWinner(current.squares);
         let status;
-        if (winner) {
-            status = `Winner: ${winner}`;
+        if (winCalcResult) {
+            status = `Winner: ${winCalcResult.winner}`;
         }
         else {
             status = `Next player: ${(this.state.xIsNext ? 'X' : 'O')}`;
@@ -121,6 +124,7 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board squares={current.squares}
                         onClick={(i) => this.handleClick(i)}
+                        squaresToHighlight={winCalcResult?.squares}
                     />
                 </div>
                 <div className="game-info">
@@ -146,7 +150,10 @@ function calculateWinner(squares) {
     for (let i = 0; i < lines.length; i++) {
         const [a, b, c] = lines[i];
         if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-            return squares[a];
+            return {
+                winner:squares[a],
+                squares:[a,b,c]
+            };
         }
     }
     return null;

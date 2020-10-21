@@ -53,3 +53,8 @@ ol, ul {
     font-weight: bolder;
     font-size: medium;
 }
+
+.square.highlight {
+    background-color: green;
+    color: white;
+}
